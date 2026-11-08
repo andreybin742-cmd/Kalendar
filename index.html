@@ -105,7 +105,7 @@ function year(){
   h+=`<div class="mo glass"><h3>${MN[mo]} ${y}</h3><div class="g">`+"ПВСЧПСВ".split("").map((_,j)=>`<div class="wd">${["пн","вт","ср","чт","пт","сб","вс"][j]}</div>`).join("");
   for(let j=0;j<off;j++)h+="<div></div>";
   for(let d=1;d<=days;d++){const ev=map[y+"-"+mo+"-"+d],td=y==today.getFullYear()&&mo==today.getMonth()+1&&d==today.getDate();
-   h+=`<div class="c${ev?" ev":""}${td?" td":""}"${ev?` data-k="${y}-${mo}-${d}"`:""}>${d}`+(ev?ev.slice(0,2).map(e=>`<i class="${e[6]}">${e[4]}</i>`).join("")+(ev.length>2?`<i>+${ev.length-2}</i>`:""):"")+"</div>"}
+   h+=`<div class="c${ev?" ev":""}${td?" td":""}"${ev?` data-k="${y}-${mo}-${d}"`:""}>${d}`+(ev?ev.slice(0,2).map(e=>`<i class="${e[6]}">${escapeHTML(e[4])}</i>`).join("")+(ev.length>2?`<i>+${ev.length-2}</i>`:""):"")+"</div>"}
   h+="</div></div>"}
  $("vy").innerHTML=h+"</div>";
  $("vy").querySelectorAll(".c.ev").forEach(c=>c.onclick=()=>modal(map[c.dataset.k],c.dataset.k));
