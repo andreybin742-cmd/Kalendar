@@ -14,8 +14,10 @@ h1{margin:0;font-size:clamp(34px,8vw,68px);font-weight:800;letter-spacing:-1px;t
 .next{max-width:1004px;margin:14px 18px 0;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 @media(min-width:1040px){.next{margin:14px auto 0}}
 .next small{color:var(--mut);font-size:11px;letter-spacing:2px;text-transform:uppercase;display:block}.next b{font-size:19px}.cd{color:var(--ac);font-size:22px;font-weight:700}
-.bar{position:sticky;top:0;z-index:5;padding:10px 18px}
-.bar>div{max-width:1004px;margin:auto;padding:8px 10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.bar{position:sticky;top:0;z-index:5;padding:8px 18px;display:grid;gap:6px;background:rgba(10,10,13,.84);backdrop-filter:blur(14px)}
+.bar>section{max-width:1004px;width:100%;margin:auto}
+.filter-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--mut);padding:2px 5px 5px}
+.filter-group>div.glass{padding:7px 9px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 button,input{font:inherit;font-size:14px;color:var(--tx);background:var(--gl2);border:1px solid transparent;border-radius:99px;padding:7px 14px;cursor:pointer;transition:.25s}
 button:hover{border-color:var(--bd)}button.on{background:rgba(255,255,255,.22);border-color:var(--bd)}
 .sep{width:1px;height:22px;background:var(--bd);margin:0 4px}
@@ -27,6 +29,8 @@ h2{margin:30px 0 10px;font-size:20px;letter-spacing:3px;text-transform:uppercase
 .card.in{opacity:1;transform:none}.card:hover{background:rgba(30,30,36,.55)}
 .card.past{opacity:.4!important}
 .row{display:flex;gap:16px;align-items:center}
+.fav-btn{flex:0 0 auto;min-width:38px;padding:6px 10px;font-size:20px;color:var(--ac);line-height:1}
+.ev1 .fav-btn{float:right}
 .d{min-width:70px;text-align:center;font-weight:800;font-size:23px;line-height:1;color:var(--ac)}.d small{display:block;font-size:11px;color:var(--mut);margin-top:4px;font-weight:600;letter-spacing:1px}
 .i{flex:1}.i b{font-size:17px;display:block}.i span{color:var(--mut);font-size:14px}
 .tag{font-size:11px;padding:3px 10px;border-radius:99px;border:1px solid;white-space:nowrap}.tag.j{color:var(--jam)}.tag.f{color:var(--fed)}
@@ -50,7 +54,10 @@ h2{margin:30px 0 10px;font-size:20px;letter-spacing:3px;text-transform:uppercase
 </style></head><body>
 <header><p class="sub">Россия · 2026 / 2027 · джемы · баттлы · чемпионаты</p><h1>Break Calendar</h1></header>
 <div class="next glass" id="next"></div>
-<div class="bar"><div class="glass" id="f"></div></div>
+<div class="bar">
+ <section class="filter-group"><div class="filter-title">Как смотреть</div><div class="glass" id="viewbar"></div></section>
+ <section class="filter-group"><div class="filter-title">Что смотреть</div><div class="glass" id="f"></div></section>
+</div>
 <main><div class="view on" id="vl"></div><div class="view" id="vy"></div></main>
 <div id="md"><div class="box glass" id="mb"></div></div>
 <script>
@@ -74,15 +81,24 @@ const end=e=>new Date(e[0],e[1]-1,e[3]||e[2]);
 const dt=e=>e[2]+(e[3]?"–"+e[3]:"")+" "+MS[e[1]];
 const $=id=>document.getElementById(id);
 let flt="all",q="",view="l";
-const tabs=[["l","Список"],["y","Календарь на год"],"|",["all","Все"],["j","Джемы"],["f","ФТСАРР"],["up","Ближайшие"]];
-tabs.forEach(t=>{if(t==="|"){const s=document.createElement("span");s.className="sep";$("f").appendChild(s);return}
- const b=document.createElement("button");b.textContent=t[1];b.dataset.k=t[0];b.onclick=()=>{["l","y"].includes(t[0])?view=t[0]:flt=t[0];render()};$("f").appendChild(b)});
+const FAVORITES_KEY="breakCalendarFavorites_v1";
+function readFavorites(){try{return new Set(JSON.parse(localStorage.getItem(FAVORITES_KEY)||"[]"))}catch(_){return new Set()}}
+let favorites=readFavorites();
+const eventKey=e=>String(e[10]||[e[0],e[1],e[2],e[4],e[5]].join("|"));
+const isFavorite=e=>favorites.has(eventKey(e));
+function favoriteButton(e,index){return '<button class="fav-btn" type="button" data-fav-index="'+index+'" aria-label="Добавить или убрать из избранного" title="Избранное">'+(isFavorite(e)?"★":"☆")+'</button>'}
+function toggleFavorite(e){const id=eventKey(e);if(favorites.has(id))favorites.delete(id);else favorites.add(id);try{localStorage.setItem(FAVORITES_KEY,JSON.stringify([...favorites]))}catch(_){ }}
+const viewTabs=[["l","Список"],["y","Календарь"]];
+viewTabs.forEach(t=>{const b=document.createElement("button");b.textContent=t[1];b.dataset.k=t[0];b.onclick=()=>{view=t[0];render()};$("viewbar").appendChild(b)});
+const filterTabs=[["all","Все"],["j","Джемы"],["f","ФТСАРР"],["up","Ближайшие"],["fav","★ Избранное"]];
+filterTabs.forEach(t=>{const b=document.createElement("button");b.textContent=t[1];b.dataset.k=t[0];b.onclick=()=>{flt=t[0];render()};$("f").appendChild(b)});
 const inp=document.createElement("input");inp.placeholder="Город или название…";inp.oninput=()=>{q=inp.value.toLowerCase();render()};$("f").appendChild(inp);
-const ok=e=>{const p=end(e)<today;if(flt==="up"&&p)return 0;if((flt==="j"||flt==="f")&&e[6]!==flt)return 0;return !q||(e[4]+" "+e[5]).toLowerCase().includes(q)};
+const ok=e=>{const p=end(e)<today;if(flt==="up"&&p)return 0;if(flt==="fav"&&!isFavorite(e))return 0;if((flt==="j"||flt==="f")&&e[6]!==flt)return 0;return !q||(e[4]+" "+e[5]).toLowerCase().includes(q)};
 const escapeHTML=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const vk=e=>{if(!e[7])return '<span class="btn off">Группы ВК нет</span>';const raw=String(e[7]),url=/^https?:\/\//i.test(raw)?raw:"https://vk.com/club"+raw;return '<a class="btn" href="'+escapeHTML(url)+'" target="_blank" rel="noopener">Группа ВКонтакте ↗</a>';};
 function render(){
- document.querySelectorAll("#f button").forEach(b=>b.classList.toggle("on",b.dataset.k===view||b.dataset.k===flt));
+ document.querySelectorAll("#viewbar button").forEach(b=>b.classList.toggle("on",b.dataset.k===view));
+ document.querySelectorAll("#f button").forEach(b=>b.classList.toggle("on",b.dataset.k===flt));
  $("vl").classList.toggle("on",view==="l");$("vy").classList.toggle("on",view==="y");
  view==="l"?list():year();
 }
@@ -91,8 +107,10 @@ function list(){
  E.forEach(e=>{if(!ok(e))return;
   const k=e[0]+"-"+e[1];if(k!==last){last=k;const h=document.createElement("h2");h.textContent=MN[e[1]]+" "+e[0];m.appendChild(h)}
   const c=document.createElement("div");c.className="card glass"+(end(e)<today?" past":"");
-  c.innerHTML=`<div class="row"><div class="d">${e[2]}${e[3]?"–"+e[3]:""}<small>${MS[e[1]].toUpperCase()}</small></div><div class="i"><b></b><span>📍 ${escapeHTML(e[5])}</span></div><span class="tag ${e[6]}">${e[6]==="f"?"ФТСАРР":"Джем / баттл"}</span></div><div class="more">${dt(e)} ${e[0]} · ${escapeHTML(e[5])}<br>${e[8]?escapeHTML(e[8])+"<br>":""}${e[9]?'<img src="'+escapeHTML(e[9])+'" alt="Афиша мероприятия" loading="lazy">':""}${vk(e)}</div>`;
-  c.querySelector("b").textContent=e[4];c.onclick=ev=>{if(!ev.target.closest("a"))c.classList.toggle("open")};m.appendChild(c);n++});
+  c.innerHTML=`<div class="row"><div class="d">${e[2]}${e[3]?"–"+e[3]:""}<small>${MS[e[1]].toUpperCase()}</small></div><div class="i"><b></b><span>📍 ${escapeHTML(e[5])}</span></div><span class="tag ${e[6]}">${e[6]==="f"?"ФТСАРР":"Джем / баттл"}</span>${favoriteButton(e,0)}</div><div class="more">${dt(e)} ${e[0]} · ${escapeHTML(e[5])}<br>${e[8]?escapeHTML(e[8])+"<br>":""}${e[9]?'<img src="'+escapeHTML(e[9])+'" alt="Афиша мероприятия" loading="lazy">':""}${vk(e)}</div>`;
+  c.querySelector("b").textContent=e[4];
+  c.querySelector("[data-fav-index]").onclick=ev=>{ev.stopPropagation();toggleFavorite(e);render()};
+  c.onclick=ev=>{if(!ev.target.closest("a,button"))c.classList.toggle("open")};m.appendChild(c);n++});
  if(!n)m.innerHTML='<div class="empty">Ничего не найдено</div>';
  const io=new IntersectionObserver(r=>r.forEach(x=>{if(x.isIntersecting){x.target.classList.add("in");io.unobserve(x.target)}}),{threshold:.1});
  m.querySelectorAll(".card").forEach((c,i)=>{c.style.transitionDelay=(i%4)*50+"ms";io.observe(c)});
@@ -111,8 +129,10 @@ function year(){
  $("vy").querySelectorAll(".c.ev").forEach(c=>c.onclick=()=>modal(map[c.dataset.k],c.dataset.k));
 }
 function modal(evs,k){const [y,mo,d]=k.split("-");
- $("mb").innerHTML=`<button class="x" onclick="$('md').classList.remove('on')">✕</button><div style="color:var(--ac);letter-spacing:2px;text-transform:uppercase;font-size:13px">${d} ${MN[+mo]} ${y}</div>`+evs.map(e=>`<div class="ev1"><span class="tag ${e[6]}">${e[6]==="f"?"ФТСАРР":"Джем / баттл"}</span><b class="t"></b><div style="color:var(--mut)">📍 ${escapeHTML(e[5])} · ${dt(e)}</div>${e[8]?'<div style="color:var(--mut);margin:8px 0">'+escapeHTML(e[8])+'</div>':""}${e[9]?'<img src="'+escapeHTML(e[9])+'" alt="Афиша мероприятия" loading="lazy" style="display:block;max-width:100%;max-height:260px;object-fit:contain;border-radius:12px;margin:10px 0">':""}${vk(e)}</div>`).join("");
- $("mb").querySelectorAll(".t").forEach((t,i)=>t.textContent=evs[i][4]);$("md").classList.add("on")}
+ $("mb").innerHTML=`<button class="x" onclick="$('md').classList.remove('on')">✕</button><div style="color:var(--ac);letter-spacing:2px;text-transform:uppercase;font-size:13px">${d} ${MN[+mo]} ${y}</div>`+evs.map((e,i)=>`<div class="ev1"><span class="tag ${e[6]}">${e[6]==="f"?"ФТСАРР":"Джем / баттл"}</span>${favoriteButton(e,i)}<b class="t"></b><div style="color:var(--mut)">📍 ${escapeHTML(e[5])} · ${dt(e)}</div>${e[8]?'<div style="color:var(--mut);margin:8px 0">'+escapeHTML(e[8])+'</div>':""}${e[9]?'<img src="'+escapeHTML(e[9])+'" alt="Афиша мероприятия" loading="lazy" style="display:block;max-width:100%;max-height:260px;object-fit:contain;border-radius:12px;margin:10px 0">':""}${vk(e)}</div>`).join("");
+ $("mb").querySelectorAll(".t").forEach((t,i)=>t.textContent=evs[i][4]);
+ $("mb").querySelectorAll("[data-fav-index]").forEach(btn=>btn.onclick=()=>{toggleFavorite(evs[Number(btn.dataset.favIndex)]);modal(evs,k)});
+ $("md").classList.add("on")}
 $("md").onclick=e=>{if(e.target.id==="md")$("md").classList.remove("on")};
 function updateNext(){const e=E.find(e=>end(e)>=today),b=$("next");if(!e){b.style.display="none";return}
  const dd=Math.max(0,Math.ceil((new Date(e[0],e[1]-1,e[2])-now)/864e5));
