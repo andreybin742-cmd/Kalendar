@@ -1,14 +1,3 @@
 {
-  "events": [
-    {
-      "id": "c6d960d1f022",
-      "title": "Break proverka",
-      "date": "2026-12-05",
-      "end_date": "2026-12-05",
-      "city": "Омск",
-      "kind": "Джем / баттл",
-      "details": "Это только проверка! ✅",
-      "poster_url": "https://raw.githubusercontent.com/andreybin742-cmd/Kalendar/main/events/c6d960d1f022.jpg"
-    }
-  ]
+  "events": []
 }
