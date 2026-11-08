@@ -79,7 +79,9 @@ tabs.forEach(t=>{if(t==="|"){const s=document.createElement("span");s.className=
  const b=document.createElement("button");b.textContent=t[1];b.dataset.k=t[0];b.onclick=()=>{["l","y"].includes(t[0])?view=t[0]:flt=t[0];render()};$("f").appendChild(b)});
 const inp=document.createElement("input");inp.placeholder="Город или название…";inp.oninput=()=>{q=inp.value.toLowerCase();render()};$("f").appendChild(inp);
 const ok=e=>{const p=end(e)<today;if(flt==="up"&&p)return 0;if((flt==="j"||flt==="f")&&e[6]!==flt)return 0;return !q||(e[4]+" "+e[5]).toLowerCase().includes(q)};
-const vk=e=>e[7]?`<a class="btn" href="https://vk.com/club${e[7]}" target="_blank" rel="noopener">Группа ВКонтакте ↗</a>`:`<span class="btn off">Группы ВК нет</span>`;
+const escapeHTML=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const vk=e=>{if(!e[7])return '<span class="btn off">Группы ВК нет</span>';const raw=String(e[7]),url=/^https?:\/\//i.test(raw)?raw:"https://vk.com/club"+raw;return '<a class="btn" href="'+escapeHTML(url)+'" target="_blank" rel="noopener">Группа ВКонтакте ↗</a>';};
+.card.open .more{max-height:480px;margin-top:12px}.more img{display:block;max-width:100%;max-height:220px;object-fit:contain;border-radius:12px;margin:10px 0}
 function render(){
  document.querySelectorAll("#f button").forEach(b=>b.classList.toggle("on",b.dataset.k===view||b.dataset.k===flt));
  $("vl").classList.toggle("on",view==="l");$("vy").classList.toggle("on",view==="y");
@@ -90,7 +92,7 @@ function list(){
  E.forEach(e=>{if(!ok(e))return;
   const k=e[0]+"-"+e[1];if(k!==last){last=k;const h=document.createElement("h2");h.textContent=MN[e[1]]+" "+e[0];m.appendChild(h)}
   const c=document.createElement("div");c.className="card glass"+(end(e)<today?" past":"");
-  c.innerHTML=`<div class="row"><div class="d">${e[2]}${e[3]?"–"+e[3]:""}<small>${MS[e[1]].toUpperCase()}</small></div><div class="i"><b></b><span>📍 ${e[5]}</span></div><span class="tag ${e[6]}">${e[6]==="f"?"ФТСАРР":"Джем / баттл"}</span></div><div class="more">${dt(e)} ${e[0]} · ${e[5]}<br>${vk(e)}</div>`;
+  c.innerHTML=\`<div class="row"><div class="d">\${e[2]}\${e[3]?"–"+e[3]:""}<small>\${MS[e[1]].toUpperCase()}</small></div><div class="i"><b></b><span>📍 \${escapeHTML(e[5])}</span></div><span class="tag \${e[6]}">\${e[6]==="f"?"ФТСАРР":"Джем / баттл"}</span></div><div class="more">\${dt(e)} \${e[0]} · \${escapeHTML(e[5])}<br>\${e[8]?escapeHTML(e[8])+"<br>":""}\${e[9]?'<img src="'+escapeHTML(e[9])+'" alt="Афиша мероприятия" loading="lazy">':""}\${vk(e)}</div>\`;
   c.querySelector("b").textContent=e[4];c.onclick=ev=>{if(!ev.target.closest("a"))c.classList.toggle("open")};m.appendChild(c);n++});
  if(!n)m.innerHTML='<div class="empty">Ничего не найдено</div>';
  const io=new IntersectionObserver(r=>r.forEach(x=>{if(x.isIntersecting){x.target.classList.add("in");io.unobserve(x.target)}}),{threshold:.1});
@@ -110,11 +112,30 @@ function year(){
  $("vy").querySelectorAll(".c.ev").forEach(c=>c.onclick=()=>modal(map[c.dataset.k],c.dataset.k));
 }
 function modal(evs,k){const [y,mo,d]=k.split("-");
- $("mb").innerHTML=`<button class="x" onclick="$('md').classList.remove('on')">✕</button><div style="color:var(--ac);letter-spacing:2px;text-transform:uppercase;font-size:13px">${d} ${MN[+mo]} ${y}</div>`+evs.map(e=>`<div class="ev1"><span class="tag ${e[6]}">${e[6]==="f"?"ФТСАРР":"Джем / баттл"}</span><b class="t"></b><div style="color:var(--mut)">📍 ${e[5]} · ${dt(e)}</div>${vk(e)}</div>`).join("");
+ $("mb").innerHTML=\`<button class="x" onclick="$('md').classList.remove('on')">✕</button><div style="color:var(--ac);letter-spacing:2px;text-transform:uppercase;font-size:13px">\${d} \${MN[+mo]} \${y}</div>\`+evs.map(e=>\`<div class="ev1"><span class="tag \${e[6]}">\${e[6]==="f"?"ФТСАРР":"Джем / баттл"}</span><b class="t"></b><div style="color:var(--mut)">📍 \${escapeHTML(e[5])} · \${dt(e)}</div>\${e[8]?'<div style="color:var(--mut);margin:8px 0">'+escapeHTML(e[8])+'</div>':""}\${e[9]?'<img src="'+escapeHTML(e[9])+'" alt="Афиша мероприятия" loading="lazy" style="display:block;max-width:100%;max-height:260px;object-fit:contain;border-radius:12px;margin:10px 0">':""}\${vk(e)}</div>\`).join("");
  $("mb").querySelectorAll(".t").forEach((t,i)=>t.textContent=evs[i][4]);$("md").classList.add("on")}
 $("md").onclick=e=>{if(e.target.id==="md")$("md").classList.remove("on")};
-(function(){const e=E.find(e=>end(e)>=today),b=$("next");if(!e){b.style.display="none";return}
+function updateNext(){const e=E.find(e=>end(e)>=today),b=$("next");if(!e){b.style.display="none";return}
  const dd=Math.max(0,Math.ceil((new Date(e[0],e[1]-1,e[2])-now)/864e5));
- b.innerHTML=`<div><small>Ближайшее событие</small><b></b><div style="color:var(--mut)">📍 ${e[5]} · ${dt(e)}</div></div><div class="cd">${dd>0?"через "+dd+" дн.":"сейчас"}</div>`;b.querySelector("b").textContent=e[4]})();
-render();
+ b.innerHTML=\`<div><small>Ближайшее событие</small><b></b><div style="color:var(--mut)">📍 \${escapeHTML(e[5])} · \${dt(e)}</div></div><div class="cd">\${dd>0?"через "+dd+" дн.":"сейчас"}</div>\`;b.querySelector("b").textContent=e[4]}
+render();updateNext();
+async function loadExternalEvents(){
+ try{
+  const response=await fetch("./events.json",{cache:"no-store"});
+  if(!response.ok)throw new Error("events.json: HTTP "+response.status);
+  const data=await response.json();
+  (Array.isArray(data.events)?data.events:[]).forEach(item=>{
+   if(!item||!item.date||!item.title)return;
+   const start=String(item.date).split("-").map(Number),finish=String(item.end_date||item.date).split("-").map(Number);
+   if(start.length!==3||start.some(n=>!Number.isFinite(n)))return;
+   const [year,month,day]=start;
+   const endDay=finish[0]===year&&finish[1]===month?finish[2]:day;
+   const kind=/фтс|чемпион|официаль/i.test(String(item.kind||""))?"f":"j";
+   E.push([year,month,day,endDay===day?0:endDay,item.title,item.city||"",kind,item.vk_url||item.vk||"",item.details||"",item.poster_url||"",item.id||""]);
+  });
+  E.sort((a,b)=>new Date(a[0],a[1]-1,a[2])-new Date(b[0],b[1]-1,b[2]));
+  render();updateNext();
+ }catch(error){console.warn("Не удалось загрузить мероприятия из events.json",error)}
+}
+loadExternalEvents();
 </script></body></html>
