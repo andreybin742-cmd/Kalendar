@@ -1,14 +1,3 @@
 {
-  "events": [
-    {
-      "id": "33abdb94f8df",
-      "title": "Вовчик топ чик",
-      "date": "2026-11-10",
-      "end_date": "2026-11-12",
-      "city": "Новосибирск",
-      "kind": "Фестиваль / другое",
-      "vk_url": "https://vk.ru/soultrain_school",
-      "details": "Танцы обниманцы ❤️"
-    }
-  ]
+  "events": []
 }
