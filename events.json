@@ -1,15 +1,3 @@
 {
-  "events": [
-    {
-      "id": "f60ac86afabd",
-      "title": "Проверка 123",
-      "date": "2026-11-10",
-      "end_date": "2026-11-11",
-      "city": "Москва",
-      "kind": "Фестиваль / другое",
-      "vk_url": "https://vk.ru/sbstepcrew",
-      "details": "Просто проверка",
-      "poster_url": "https://raw.githubusercontent.com/andreybin742-cmd/Kalendar/main/events/f60ac86afabd.jpg"
-    }
-  ]
+  "events": []
 }
