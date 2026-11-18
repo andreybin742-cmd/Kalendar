@@ -1,15 +1,3 @@
 {
-  "events": [
-    {
-      "id": "762ca533a905",
-      "title": "Тест ВК 2",
-      "date": "2026-11-19",
-      "end_date": "2026-11-20",
-      "city": "Омск",
-      "kind": "Джем / баттл",
-      "vk_url": "https://vk.ru/club243371027",
-      "details": "Проверочка",
-      "poster_url": "https://raw.githubusercontent.com/andreybin742-cmd/Kalendar/main/events/762ca533a905.jpg"
-    }
-  ]
+  "events": []
 }
