@@ -1,15 +1,6 @@
 {
   "events": [
     {
-      "id": "c6cfae8ac8ce",
-      "title": "123",
-      "date": "2026-11-19",
-      "end_date": "2026-11-19",
-      "city": "Санкт-Петербург",
-      "kind": "Фестиваль / другое",
-      "poster_url": "https://raw.githubusercontent.com/andreybin742-cmd/Kalendar/main/events/c6cfae8ac8ce.jpg"
-    },
-    {
       "id": "762ca533a905",
       "title": "Тест ВК 2",
       "date": "2026-11-19",
